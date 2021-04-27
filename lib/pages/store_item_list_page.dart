@@ -1,5 +1,9 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:grocery_app/view_model/store_item_list_view_model.dart';
+import 'package:grocery_app/view_model/store_item_view_model.dart';
 import 'package:grocery_app/view_model/strore_view_model.dart';
+import 'package:grocery_app/widgets/store_items_widget.dart';
 
 class StoreItemListPage extends StatelessWidget {
   final _nameController = TextEditingController();
@@ -7,7 +11,10 @@ class StoreItemListPage extends StatelessWidget {
   final _quantityController = TextEditingController();
 
   final StoreViewModel store;
-  StoreItemListPage({this.store});
+  StoreItemListViewModel _storeItemListViewModel;
+  StoreItemListPage({this.store})
+      : _storeItemListViewModel =
+            new StoreItemListViewModel(storeViewModel: store);
 
   final _formKey = GlobalKey<FormState>();
 
@@ -19,7 +26,16 @@ class StoreItemListPage extends StatelessWidget {
     return null;
   }
 
-  void _saveStoreItem() {}
+  void _saveStoreItem() {
+    if (_formKey.currentState.validate()) {
+      _storeItemListViewModel.name = _nameController.text;
+      _storeItemListViewModel.price = double.parse(_priceController.text);
+      _storeItemListViewModel.quantity = int.parse(_quantityController.text);
+
+      _storeItemListViewModel.saveStoreItem();
+      _clearTextBoxes();
+    }
+  }
 
   void _clearTextBoxes() {
     _nameController.clear();
@@ -28,7 +44,20 @@ class StoreItemListPage extends StatelessWidget {
   }
 
   Widget _buildStoreItems() {
-    return Container();
+    return StreamBuilder<QuerySnapshot>(
+      stream: _storeItemListViewModel.storeItemsAsStream,
+      builder: (context, snapshot) {
+        if (snapshot.hasData) {
+          final List<StoreItemViewModel> storeItems = snapshot.data.docs
+              .map((item) => StoreItemViewModel.fromSnapshot(item))
+              .toList();
+          print(' data : ${snapshot.data}');
+          print(snapshot.data.docs);
+          return StoreItemsWidget(storeItems: storeItems);
+        }
+        return Text("No Data found!");
+      },
+    );
   }
 
   Widget _buildBody() {
@@ -55,7 +84,9 @@ class StoreItemListPage extends StatelessWidget {
           RaisedButton(
             child: Text("Save", style: TextStyle(color: Colors.white)),
             color: Colors.blue,
-            onPressed: () {},
+            onPressed: () {
+              _saveStoreItem();
+            },
           ),
           Expanded(child: _buildStoreItems())
         ]),
