@@ -3,8 +3,7 @@ import 'package:grocery_app/models/store_item.dart';
 
 class StoreItemViewModel {
   final StoreItem storeItem;
-  final Function(StoreItemViewModel) onStoreItemDeleted;
-  StoreItemViewModel({this.storeItem, this.onStoreItemDeleted});
+  StoreItemViewModel({this.storeItem});
   get name => storeItem.name;
   get storeId => storeItem.storeId;
 

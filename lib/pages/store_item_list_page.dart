@@ -51,9 +51,12 @@ class StoreItemListPage extends StatelessWidget {
           final List<StoreItemViewModel> storeItems = snapshot.data.docs
               .map((item) => StoreItemViewModel.fromSnapshot(item))
               .toList();
-          print(' data : ${snapshot.data}');
-          print(snapshot.data.docs);
-          return StoreItemsWidget(storeItems: storeItems);
+          return StoreItemsWidget(
+            storeItems: storeItems,
+            onStoreItemDeleted: (storeItem) {
+              _storeItemListViewModel.delete(storeItem);
+            },
+          );
         }
         return Text("No Data found!");
       },
